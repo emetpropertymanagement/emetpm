@@ -32,7 +32,7 @@ class DatabaseHelperPayments {
 
   Future<String> _getDatabasePath() async {
     final directory = await getApplicationDocumentsDirectory();
-    return join(directory.path, 'exodus_app');
+    return join(directory.path, 'exodus.db');
   }
 
   Future<void> _createDb(Database db, int version) async {

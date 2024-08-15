@@ -32,12 +32,12 @@ class DatabaseHelperInsert {
 
   Future<String> _getDatabasePath() async {
     final directory = await getApplicationDocumentsDirectory();
-    final dbPath = join(directory.path, 'exodus_app');
+    final dbPath = join(directory.path, 'exodus.db');
 
     // Check if the database file already exists
     if (!await File(dbPath).exists()) {
       // Copy the bundled database file to the application documents directory
-      ByteData data = await rootBundle.load('assets/exodus_app');
+      ByteData data = await rootBundle.load('assets/exodus.db');
       List<int> bytes = data.buffer.asUint8List();
       await File(dbPath).writeAsBytes(bytes);
     }
