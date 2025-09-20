@@ -131,13 +131,6 @@ class ReceiptsPage extends StatelessWidget {
                                           tooltip: 'Share',
                                           onPressed: () => _shareReceipt(data),
                                         ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete,
-                                              color: Colors.red),
-                                          tooltip: 'Delete',
-                                          onPressed: () => _deleteReceipt(
-                                              context, docs[index].id),
-                                        ),
                                       ],
                                     ),
                                   );
