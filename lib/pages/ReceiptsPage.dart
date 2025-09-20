@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'AppLayout.dart';
 
@@ -185,9 +184,15 @@ class ReceiptsPage extends StatelessWidget {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.share, color: Colors.green),
-              tooltip: 'Share',
-              onPressed: () => _shareReceipt(data),
+              icon: const Icon(Icons.download, color: Colors.blue),
+              tooltip: 'Download',
+              onPressed: () async {
+                final url = data['receiptPdfUrl'];
+                if (url != null) {
+                  await launchUrl(Uri.parse(url),
+                      mode: LaunchMode.externalApplication);
+                }
+              },
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -212,10 +217,5 @@ class ReceiptsPage extends StatelessWidget {
     );
   }
 
-  void _shareReceipt(Map<String, dynamic> data) {
-    final url = data['receiptPdfUrl'] ?? '';
-    final text =
-        'Receipt for ${data['clientName']}\nAmount: ${data['amount']}\n$url';
-    Share.share(text);
-  }
+  // Download logic handled in the details dialog above.
 }

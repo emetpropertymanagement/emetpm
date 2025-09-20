@@ -156,12 +156,6 @@ class _PaymentFormState extends State<PaymentForm> {
 
   Future<String> _uploadPdf(File file) async {
     try {
-      final String fileName =
-          'receipt_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      final String apartment =
-          (widget.clientDetails['propertyName'] ?? 'unknown_apartment')
-              .toString()
-              .replaceAll('/', '_');
       final int year = DateTime.now().year;
       final int month = DateTime.now().month;
       const List<String> monthNames = [
@@ -179,7 +173,17 @@ class _PaymentFormState extends State<PaymentForm> {
         'december'
       ];
       final String monthName = monthNames[month - 1];
-      final String filePath = '$apartment/$year/$monthName/$fileName';
+      String clientName = (widget.clientDetails['name'] ?? 'client')
+          .toString()
+          .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')
+          .toLowerCase();
+      // fileName is now in filePath, so no need for a separate variable
+      final String apartment =
+          (widget.clientDetails['propertyName'] ?? 'unknown_apartment')
+              .toString()
+              .replaceAll('/', '_');
+      final String filePath =
+          '$apartment/$year/$monthName/${clientName}_$monthName-$year.pdf';
       final ref = FirebaseStorage.instance.ref().child(filePath);
       final uploadTask = ref.putFile(file);
 
