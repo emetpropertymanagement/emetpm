@@ -243,7 +243,7 @@ class _PaymentFormState extends State<PaymentForm> {
               0, 0, page.getClientSize().width, page.getClientSize().height));
 
       // Add 250px top gap
-      double tableTop = 250;
+      double tableTop = 200;
 
       // Prepare table data (no header row)
       final List<List<String>> tableData = [
