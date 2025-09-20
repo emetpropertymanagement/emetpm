@@ -233,27 +233,71 @@ class _PaymentFormState extends State<PaymentForm> {
       final PdfDocument document = PdfDocument();
       final PdfPage page = document.pages.add();
 
-      page.graphics.drawString(
-          'RECEIPT',
-          PdfStandardFont(PdfFontFamily.helvetica, 30,
-              style: PdfFontStyle.bold));
+      // Add 400px top gap
+      double tableTop = 400;
 
-      double y = 50;
-      void drawLine(String label, String value) {
-        page.graphics.drawString(
-            '$label: $value', PdfStandardFont(PdfFontFamily.helvetica, 12),
-            bounds: Rect.fromLTWH(0, y, 500, 20));
-        y += 25;
+      // Prepare table data
+      final List<List<String>> tableData = [
+        ['Client', widget.clientDetails['name'] ?? ''],
+        ['Property', widget.clientDetails['propertyName'] ?? ''],
+        ['Amount', 'UgX ${_formatMoney(amountController.text)}'],
+        ['In Words', amountInWordsController.text],
+        ['For', reasonController.text],
+        ['Balance', 'UgX ${_formatMoney(balanceController.text)}'],
+        ['Next Payment', nextDateController.text],
+        ['Date', "${DateTime.now().toLocal()}".split(' ')[0]],
+      ];
+
+      // Create PdfGrid
+      final PdfGrid grid = PdfGrid();
+      grid.columns.add(count: 2);
+      grid.headers.add(1);
+      grid.headers[0].cells[0].value = 'Field';
+      grid.headers[0].cells[1].value = 'Value';
+
+      for (final row in tableData) {
+        final gridRow = grid.rows.add();
+        gridRow.cells[0].value = row[0];
+        gridRow.cells[1].value = row[1];
       }
 
-      drawLine('Client', widget.clientDetails['name']);
-      drawLine('Property', widget.clientDetails['propertyName']);
-      drawLine('Amount', amountController.text);
-      drawLine('In Words', amountInWordsController.text);
-      drawLine('For', reasonController.text);
-      drawLine('Balance', balanceController.text);
-      drawLine('Next Payment', nextDateController.text);
-      drawLine('Date', "${DateTime.now().toLocal()}".split(' ')[0]);
+      // Style
+      grid.style = PdfGridStyle(
+        cellPadding: PdfPaddings(left: 8, right: 8, top: 6, bottom: 6),
+        font: PdfStandardFont(PdfFontFamily.helvetica, 13),
+        borderOverlapStyle: PdfBorderOverlapStyle.inside,
+        cellSpacing: 0,
+      );
+      // Set header cell style and stringFormat
+      for (int i = 0; i < grid.headers[0].cells.count; i++) {
+        final cell = grid.headers[0].cells[i];
+        cell.style = PdfGridCellStyle(
+          backgroundBrush: PdfSolidBrush(PdfColor(240, 240, 240)),
+          font: PdfStandardFont(PdfFontFamily.helvetica, 13,
+              style: PdfFontStyle.bold),
+        );
+        cell.stringFormat = PdfStringFormat(
+          alignment: PdfTextAlignment.left,
+          lineAlignment: PdfVerticalAlignment.middle,
+          wordWrap: PdfWordWrapType.word,
+        );
+      }
+      // Enable text wrapping for all data cells
+      for (int r = 0; r < grid.rows.count; r++) {
+        for (int c = 0; c < grid.rows[r].cells.count; c++) {
+          grid.rows[r].cells[c].stringFormat = PdfStringFormat(
+            alignment: PdfTextAlignment.left,
+            lineAlignment: PdfVerticalAlignment.middle,
+            wordWrap: PdfWordWrapType.word,
+          );
+        }
+      }
+
+      // Draw the grid at 400px from the top
+      grid.draw(
+        page: page,
+        bounds: Rect.fromLTWH(40, tableTop, page.getClientSize().width - 80, 0),
+      );
 
       final List<int> bytes = await document.save();
       document.dispose();
@@ -265,6 +309,17 @@ class _PaymentFormState extends State<PaymentForm> {
     } catch (e) {
       print("Error creating PDF: $e");
       return null;
+    }
+  }
+
+  String _formatMoney(String value) {
+    try {
+      final n = double.tryParse(value.replaceAll(',', '')) ?? 0;
+      return n
+          .toStringAsFixed(0)
+          .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => ',');
+    } catch (_) {
+      return value;
     }
   }
 }
