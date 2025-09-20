@@ -233,10 +233,19 @@ class _PaymentFormState extends State<PaymentForm> {
       final PdfDocument document = PdfDocument();
       final PdfPage page = document.pages.add();
 
-      // Add 400px top gap
-      double tableTop = 400;
+      // Draw background image
+      final ByteData imageData = await rootBundle.load('assets/receipt.png');
+      final List<int> imageBytes = imageData.buffer.asUint8List();
+      final PdfBitmap bgImage = PdfBitmap(imageBytes);
+      page.graphics.drawImage(
+          bgImage,
+          Rect.fromLTWH(
+              0, 0, page.getClientSize().width, page.getClientSize().height));
 
-      // Prepare table data
+      // Add 250px top gap
+      double tableTop = 250;
+
+      // Prepare table data (no header row)
       final List<List<String>> tableData = [
         ['Client', widget.clientDetails['name'] ?? ''],
         ['Property', widget.clientDetails['propertyName'] ?? ''],
@@ -248,13 +257,9 @@ class _PaymentFormState extends State<PaymentForm> {
         ['Date', "${DateTime.now().toLocal()}".split(' ')[0]],
       ];
 
-      // Create PdfGrid
+      // Create PdfGrid (no header)
       final PdfGrid grid = PdfGrid();
       grid.columns.add(count: 2);
-      grid.headers.add(1);
-      grid.headers[0].cells[0].value = 'Field';
-      grid.headers[0].cells[1].value = 'Value';
-
       for (final row in tableData) {
         final gridRow = grid.rows.add();
         gridRow.cells[0].value = row[0];
@@ -268,20 +273,6 @@ class _PaymentFormState extends State<PaymentForm> {
         borderOverlapStyle: PdfBorderOverlapStyle.inside,
         cellSpacing: 0,
       );
-      // Set header cell style and stringFormat
-      for (int i = 0; i < grid.headers[0].cells.count; i++) {
-        final cell = grid.headers[0].cells[i];
-        cell.style = PdfGridCellStyle(
-          backgroundBrush: PdfSolidBrush(PdfColor(240, 240, 240)),
-          font: PdfStandardFont(PdfFontFamily.helvetica, 13,
-              style: PdfFontStyle.bold),
-        );
-        cell.stringFormat = PdfStringFormat(
-          alignment: PdfTextAlignment.left,
-          lineAlignment: PdfVerticalAlignment.middle,
-          wordWrap: PdfWordWrapType.word,
-        );
-      }
       // Enable text wrapping for all data cells
       for (int r = 0; r < grid.rows.count; r++) {
         for (int c = 0; c < grid.rows[r].cells.count; c++) {
@@ -293,7 +284,7 @@ class _PaymentFormState extends State<PaymentForm> {
         }
       }
 
-      // Draw the grid at 400px from the top
+      // Draw the grid at 250px from the top
       grid.draw(
         page: page,
         bounds: Rect.fromLTWH(40, tableTop, page.getClientSize().width - 80, 0),
