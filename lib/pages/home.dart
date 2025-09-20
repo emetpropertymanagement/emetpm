@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 import 'Dashboard.dart';
 
@@ -125,7 +126,7 @@ class _HomeState extends State<Home> {
           ),
         ),
       );
-      if (tokens == null || tokens.accessToken == null) {
+      if (tokens == null) {
         throw Exception('Google sign-in failed: Missing accessToken');
       }
       final credential =
@@ -134,20 +135,36 @@ class _HomeState extends State<Home> {
           await FirebaseAuth.instance.signInWithCredential(credential);
       print('[Login] Firebase user: ' + (userCredential.user?.email ?? 'null'));
       if (!mounted) return;
-      final allowedEmails = [
-        'emetpropertymanagementug1@gmail.com',
-        'grealmkids@gmail.com',
-      ];
-      final userEmail = userCredential.user?.email ?? '';
-      if (allowedEmails.contains(userEmail)) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const Dashboard()),
+      // Fetch authorized emails from Firestore
+      try {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('authorized_emails')
+            .get();
+        List<String> authorizedEmails =
+            snapshot.docs.map((doc) => doc['email'] as String).toList();
+        if (authorizedEmails.contains(user.email)) {
+          // Proceed to app
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Dashboard()),
+          );
+        } else {
+          // Show access denied
+          setState(() {
+            errorMessage = "Access Denied!";
+          });
+          await GoogleSignInPlatform.instance
+              .disconnect(const DisconnectParams());
+          await FirebaseAuth.instance.signOut();
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Error checking authorization: ' + e.toString())),
         );
-      } else {
-        setState(() {
-          errorMessage = "Access Denied!";
-        });
+        await GoogleSignInPlatform.instance
+            .disconnect(const DisconnectParams());
+        await FirebaseAuth.instance.signOut();
       }
     } catch (e) {
       print('[Login] Google sign-in failed: $e');
