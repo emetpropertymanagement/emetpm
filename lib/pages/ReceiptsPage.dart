@@ -108,12 +108,6 @@ class ReceiptsPage extends StatelessWidget {
                                   onPressed: () => _showReceiptDetails(
                                       context, data, docs[index].id),
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.share,
-                                      color: Colors.green),
-                                  tooltip: 'Share',
-                                  onPressed: () => _shareReceipt(data),
-                                ),
                               ],
                             ),
                           );
@@ -189,6 +183,11 @@ class ReceiptsPage extends StatelessWidget {
                   Navigator.of(context).pop();
                 }
               },
+            ),
+            IconButton(
+              icon: const Icon(Icons.share, color: Colors.green),
+              tooltip: 'Share',
+              onPressed: () => _shareReceipt(data),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
