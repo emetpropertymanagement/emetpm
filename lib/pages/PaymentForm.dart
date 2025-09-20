@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'ReceiptsPage.dart';
 
 class PaymentForm extends StatefulWidget {
   final Map<String, dynamic> clientDetails;
@@ -139,7 +140,10 @@ class _PaymentFormState extends State<PaymentForm> {
             backgroundColor: Colors.green),
       );
 
-      Navigator.of(context).pop();
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const ReceiptsPage()),
+        (route) => false,
+      );
     } catch (e) {
       print("An error occurred during payment submission: $e");
       ScaffoldMessenger.of(context).showSnackBar(

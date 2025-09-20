@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 import 'AppLayout.dart';
 
 class ReceiptsPage extends StatelessWidget {
@@ -125,30 +126,59 @@ class ReceiptsPage extends StatelessWidget {
 
   void _showReceiptDetails(
       BuildContext context, Map<String, dynamic> data, String docId) {
+    final numberFormat = NumberFormat('#,##0');
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Receipt Details'),
           content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Table(
+              columnWidths: const {
+                0: IntrinsicColumnWidth(),
+                1: FlexColumnWidth(),
+              },
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              border: TableBorder(
+                horizontalInside:
+                    BorderSide(width: 1, color: Colors.grey.shade300),
+              ),
               children: [
-                _detailRow('Client', data['clientName']),
-                _detailRow('Property', data['propertyName']),
-                _detailRow('Amount', data['amount'].toString()),
-                _detailRow('Amount in Words', data['amountInWords']),
-                _detailRow('Reason', data['reason']),
-                _detailRow('Balance', data['balance'].toString()),
-                _detailRow('Next Payment', data['nextPaymentDate']),
-                _detailRow('Month', data['month'].toString()),
-                _detailRow('Year', data['year'].toString()),
+                _tableRow('Client', data['clientName']),
+                _tableRow('Property', data['propertyName']),
+                _tableRow(
+                    'Amount',
+                    data['amount'] != null
+                        ? 'UgX ${numberFormat.format(data['amount'])}'
+                        : ''),
+                _tableRow('Amount in Words', data['amountInWords']),
+                _tableRow('Reason', data['reason']),
+                _tableRow(
+                    'Balance',
+                    data['balance'] != null
+                        ? 'UgX ${numberFormat.format(data['balance'])}'
+                        : ''),
+                _tableRow('Next Payment', data['nextPaymentDate']),
+                _tableRow('Month', data['month']?.toString()),
+                _tableRow('Year', data['year']?.toString()),
                 if (data['receiptPdfUrl'] != null)
-                  TextButton(
-                    onPressed: () =>
-                        launchUrl(Uri.parse(data['receiptPdfUrl'])),
-                    child: const Text('Open PDF'),
-                  ),
+                  TableRow(children: [
+                    const Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+                      child: Text('PDF:',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 6.0, horizontal: 4.0),
+                      child: TextButton(
+                        onPressed: () =>
+                            launchUrl(Uri.parse(data['receiptPdfUrl'])),
+                        child: const Text('Open PDF'),
+                      ),
+                    ),
+                  ]),
               ],
             ),
           ),
@@ -204,16 +234,21 @@ class ReceiptsPage extends StatelessWidget {
     );
   }
 
-  Widget _detailRow(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value ?? '')),
-        ],
-      ),
+  TableRow _tableRow(String label, String? value) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+          child: Text(value ?? ''),
+        ),
+      ],
     );
   }
 
