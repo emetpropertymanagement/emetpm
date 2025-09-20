@@ -249,10 +249,10 @@ class _PaymentFormState extends State<PaymentForm> {
       final List<List<String>> tableData = [
         ['Client', widget.clientDetails['name'] ?? ''],
         ['Property', widget.clientDetails['propertyName'] ?? ''],
-        ['Amount', 'UgX ${_formatMoney(amountController.text)}'],
+        ['Amount', 'UGX ${_formatMoney(amountController.text)}'],
         ['In Words', amountInWordsController.text],
         ['For', reasonController.text],
-        ['Balance', 'UgX ${_formatMoney(balanceController.text)}'],
+        ['Balance', 'UGX ${_formatMoney(balanceController.text)}'],
         ['Next Payment', nextDateController.text],
         ['Date', "${DateTime.now().toLocal()}".split(' ')[0]],
       ];

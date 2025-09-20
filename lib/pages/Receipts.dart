@@ -16,8 +16,18 @@ class _ReceiptsState extends State<Receipts> {
   String? _selectedPropertyId;
 
   final List<String> _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
   ];
 
   @override
@@ -60,10 +70,13 @@ class _ReceiptsState extends State<Receipts> {
               }).toList(),
             ),
             StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('properties').snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection('properties')
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  print("Error loading properties for filter: ${snapshot.error}");
+                  print(
+                      "Error loading properties for filter: ${snapshot.error}");
                   return const Text('Error');
                 }
                 if (!snapshot.hasData) return const SizedBox.shrink();
@@ -91,10 +104,13 @@ class _ReceiptsState extends State<Receipts> {
   }
 
   Widget _buildReceiptsList() {
-    Query query = FirebaseFirestore.instance.collection('receipts').orderBy('createdAt', descending: true);
+    Query query = FirebaseFirestore.instance
+        .collection('receipts')
+        .orderBy('createdAt', descending: true);
 
     if (_selectedMonth != null) {
-      query = query.where('month', isEqualTo: _months.indexOf(_selectedMonth!) + 1);
+      query =
+          query.where('month', isEqualTo: _months.indexOf(_selectedMonth!) + 1);
     }
     if (_selectedPropertyId != null) {
       query = query.where('propertyId', isEqualTo: _selectedPropertyId);
@@ -111,10 +127,14 @@ class _ReceiptsState extends State<Receipts> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('No receipts found for the selected filters.'));
+          return const Center(
+              child: Text('No receipts found for the selected filters.'));
         }
 
-        return ListView(children: snapshot.data!.docs.map((doc) => _buildReceiptCard(doc)).toList());
+        return ListView(
+            children: snapshot.data!.docs
+                .map((doc) => _buildReceiptCard(doc))
+                .toList());
       },
     );
   }
@@ -125,7 +145,7 @@ class _ReceiptsState extends State<Receipts> {
       margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
       child: ListTile(
         title: Text(data['clientName'] ?? 'N/A'),
-        subtitle: Text('${data['propertyName']} - Ugx ${data['amount']}'),
+        subtitle: Text('${data['propertyName']} - UGX ${data['amount']}'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -139,7 +159,8 @@ class _ReceiptsState extends State<Receipts> {
                   }
                 } catch (e) {
                   print("Error launching URL: $e");
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Could not open receipt: $e")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Could not open receipt: $e")));
                 }
               },
             ),
@@ -158,26 +179,39 @@ class _ReceiptsState extends State<Receipts> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Confirm Delete'),
-            content: const Text('Are you sure you want to delete this receipt? This will also delete the PDF file.'),
+            content: const Text(
+                'Are you sure you want to delete this receipt? This will also delete the PDF file.'),
             actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-              TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Delete')),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Delete')),
             ],
           ),
-        ) ?? false;
+        ) ??
+        false;
 
     if (confirmed) {
       try {
-        await FirebaseFirestore.instance.collection('receipts').doc(docId).delete();
+        await FirebaseFirestore.instance
+            .collection('receipts')
+            .doc(docId)
+            .delete();
         await FirebaseStorage.instance.refFromURL(fileUrl).delete();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receipt deleted successfully.'), backgroundColor: Colors.green),
+          const SnackBar(
+              content: Text('Receipt deleted successfully.'),
+              backgroundColor: Colors.green),
         );
       } catch (e) {
         print("Error deleting receipt: $e");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete receipt: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Failed to delete receipt: $e'),
+              backgroundColor: Colors.red),
         );
       }
     }

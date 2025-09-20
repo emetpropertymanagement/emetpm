@@ -149,14 +149,14 @@ class ReceiptsPage extends StatelessWidget {
                 _tableRow(
                     'Amount',
                     data['amount'] != null
-                        ? 'UgX ${numberFormat.format(data['amount'])}'
+                        ? 'UGX ${numberFormat.format(data['amount'])}'
                         : ''),
                 _tableRow('Amount in Words', data['amountInWords']),
                 _tableRow('Reason', data['reason']),
                 _tableRow(
                     'Balance',
                     data['balance'] != null
-                        ? 'UgX ${numberFormat.format(data['balance'])}'
+                        ? 'UGX ${numberFormat.format(data['balance'])}'
                         : ''),
                 _tableRow('Next Payment', data['nextPaymentDate']),
                 _tableRow('Month', data['month']?.toString()),

@@ -134,10 +134,21 @@ class _HomeState extends State<Home> {
           await FirebaseAuth.instance.signInWithCredential(credential);
       print('[Login] Firebase user: ' + (userCredential.user?.email ?? 'null'));
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Dashboard()),
-      );
+      final allowedEmails = [
+        'emetpropertymanagementug1@gmail.com',
+        'grealmkids@gmail.com',
+      ];
+      final userEmail = userCredential.user?.email ?? '';
+      if (allowedEmails.contains(userEmail)) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Dashboard()),
+        );
+      } else {
+        setState(() {
+          errorMessage = "Access Denied!";
+        });
+      }
     } catch (e) {
       print('[Login] Google sign-in failed: $e');
       setState(() {
