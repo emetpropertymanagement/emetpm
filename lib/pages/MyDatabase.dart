@@ -166,7 +166,21 @@ class _DatabaseState extends State<MyDatabase> {
                 icon: const Icon(Icons.receipt,
                     color: Color.fromARGB(255, 53, 53, 53)),
                 onPressed: () {
-                  // _navigateToPaymentForm(docId, data);
+                  // Prepare client details for PaymentForm
+                  final clientDetails = {
+                    'id': docId,
+                    'name': data['name'] ?? '',
+                    'propertyId': data['propertyId'] ?? '',
+                    'propertyName': data['propertyName'] ?? '',
+                    'phone': data['phone'] ?? '',
+                  };
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          PaymentForm(clientDetails: clientDetails),
+                    ),
+                  );
                 },
               ),
             ],

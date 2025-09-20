@@ -1,6 +1,6 @@
 import 'package:emet/pages/AppLayout.dart';
 import 'package:flutter/material.dart';
-import 'package:emet/database_helper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Analytics extends StatefulWidget {
   const Analytics({super.key});
@@ -11,18 +11,20 @@ class Analytics extends StatefulWidget {
 
 class _AnalyticsState extends State<Analytics> {
   int totalClients = 0;
+  late final CollectionReference _clientsCollection;
 
   @override
   void initState() {
     super.initState();
-    updateTotalClients();
+    _clientsCollection = FirebaseFirestore.instance.collection('clients');
+    _listenToClientCount();
   }
 
-  Future<void> updateTotalClients() async {
-    List<Map<String, dynamic>> clients =
-        await DatabaseHelper.instance.getClients();
-    setState(() {
-      totalClients = clients.length;
+  void _listenToClientCount() {
+    _clientsCollection.snapshots().listen((snapshot) {
+      setState(() {
+        totalClients = snapshot.size;
+      });
     });
   }
 

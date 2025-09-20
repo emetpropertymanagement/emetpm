@@ -31,7 +31,8 @@ class _PaymentFormState extends State<PaymentForm> {
   @override
   void initState() {
     super.initState();
-    reasonController.text = 'Rent for ${DateTime.now().month}/${DateTime.now().year}';
+    reasonController.text =
+        'Rent for ${DateTime.now().month}/${DateTime.now().year}';
   }
 
   @override
@@ -40,9 +41,12 @@ class _PaymentFormState extends State<PaymentForm> {
       body: ListView(
         padding: const EdgeInsets.all(25.0),
         children: [
-          const Text("CREATE RECEIPT", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+          const Text("CREATE RECEIPT",
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          Text('For: ${widget.clientDetails["name"]}', style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+          Text('For: ${widget.clientDetails["name"]}',
+              style:
+                  const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20.0),
           Form(
             key: _formKey,
@@ -50,19 +54,25 @@ class _PaymentFormState extends State<PaymentForm> {
               children: [
                 TextFormField(
                   controller: amountController,
-                  decoration: const InputDecoration(labelText: 'Amount (Figures)'),
+                  decoration:
+                      const InputDecoration(labelText: 'Amount (Figures)'),
                   keyboardType: TextInputType.number,
-                  validator: (value) => value!.isEmpty ? 'Required Field' : null,
+                  validator: (value) =>
+                      value!.isEmpty ? 'Required Field' : null,
                 ),
                 TextFormField(
                   controller: amountInWordsController,
-                  decoration: const InputDecoration(labelText: 'Amount in Words'),
-                  validator: (value) => value!.isEmpty ? 'Required Field' : null,
+                  decoration:
+                      const InputDecoration(labelText: 'Amount in Words'),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Required Field' : null,
                 ),
                 TextFormField(
                   controller: reasonController,
-                  decoration: const InputDecoration(labelText: 'Reason for payment'),
-                  validator: (value) => value!.isEmpty ? 'Required Field' : null,
+                  decoration:
+                      const InputDecoration(labelText: 'Reason for payment'),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Required Field' : null,
                 ),
                 TextFormField(
                   controller: balanceController,
@@ -71,12 +81,17 @@ class _PaymentFormState extends State<PaymentForm> {
                 ),
                 TextFormField(
                   controller: nextDateController,
-                  decoration: const InputDecoration(labelText: 'Next Payment on:'),
+                  decoration:
+                      const InputDecoration(labelText: 'Next Payment on:'),
                   onTap: () async {
                     DateTime? picked = await showDatePicker(
-                        context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2101));
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101));
                     if (picked != null) {
-                      nextDateController.text = "${picked.toLocal()}".split(' ')[0];
+                      nextDateController.text =
+                          "${picked.toLocal()}".split(' ')[0];
                     }
                   },
                 ),
@@ -91,7 +106,8 @@ class _PaymentFormState extends State<PaymentForm> {
                   onPressed: _isSubmitting ? null : _submitPayment,
                   icon: const Icon(Icons.cloud_upload),
                   label: const Text("Create & Save Receipt"),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 ),
               ],
             ),
@@ -118,15 +134,18 @@ class _PaymentFormState extends State<PaymentForm> {
       await _saveReceiptToFirestore(downloadUrl);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Receipt created and saved successfully!'), backgroundColor: Colors.green),
+        const SnackBar(
+            content: Text('Receipt created and saved successfully!'),
+            backgroundColor: Colors.green),
       );
 
       Navigator.of(context).pop();
-
     } catch (e) {
       print("An error occurred during payment submission: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e'), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text('An error occurred: $e'),
+            backgroundColor: Colors.red),
       );
     } finally {
       setState(() {
@@ -137,8 +156,15 @@ class _PaymentFormState extends State<PaymentForm> {
 
   Future<String> _uploadPdf(File file) async {
     try {
-      final String fileName = 'receipt_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      final String filePath = 'receipts/${DateTime.now().year}/${DateTime.now().month}/$fileName';
+      final String fileName =
+          'receipt_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final String apartment =
+          (widget.clientDetails['propertyName'] ?? 'unknown_apartment')
+              .toString()
+              .replaceAll('/', '_');
+      final int year = DateTime.now().year;
+      final int month = DateTime.now().month;
+      final String filePath = '$apartment/$year/$month/$fileName';
       final ref = FirebaseStorage.instance.ref().child(filePath);
       final uploadTask = ref.putFile(file);
 
@@ -184,11 +210,16 @@ class _PaymentFormState extends State<PaymentForm> {
       final PdfDocument document = PdfDocument();
       final PdfPage page = document.pages.add();
 
-      page.graphics.drawString('RECEIPT', PdfStandardFont(PdfFontFamily.helvetica, 30, style: PdfFontStyle.bold));
-      
+      page.graphics.drawString(
+          'RECEIPT',
+          PdfStandardFont(PdfFontFamily.helvetica, 30,
+              style: PdfFontStyle.bold));
+
       double y = 50;
       void drawLine(String label, String value) {
-        page.graphics.drawString('$label: $value', PdfStandardFont(PdfFontFamily.helvetica, 12), bounds: Rect.fromLTWH(0, y, 500, 20));
+        page.graphics.drawString(
+            '$label: $value', PdfStandardFont(PdfFontFamily.helvetica, 12),
+            bounds: Rect.fromLTWH(0, y, 500, 20));
         y += 25;
       }
 
@@ -208,7 +239,6 @@ class _PaymentFormState extends State<PaymentForm> {
       final file = File('${tempDir.path}/receipt.pdf');
       await file.writeAsBytes(bytes);
       return file;
-
     } catch (e) {
       print("Error creating PDF: $e");
       return null;
