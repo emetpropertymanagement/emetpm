@@ -24,128 +24,107 @@ class ReceiptsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController searchController = TextEditingController();
+    final ValueNotifier<String> searchQuery = ValueNotifier('');
     return AppLayout(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('receipts')
-              .orderBy('createdAt', descending: true)
-              .snapshots(),
-          builder: (context, snapshot) {
-            TextEditingController searchController = TextEditingController();
-            ValueNotifier<String> searchQuery = ValueNotifier('');
-
-            return AppLayout(
-              body: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: TextField(
-                        controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search by client name or month...',
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 12),
-                        ),
-                        onChanged: (value) {
-                          searchQuery.value = value.trim().toLowerCase();
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: ValueListenableBuilder<String>(
-                        valueListenable: searchQuery,
-                        builder: (context, query, _) {
-                          return StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection('receipts')
-                                .orderBy('createdAt', descending: true)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return const Center(
-                                    child: Text('Error loading receipts.'));
-                              }
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              }
-                              final docs = snapshot.data!.docs.where((doc) {
-                                final data = doc.data() as Map<String, dynamic>;
-                                final clientName = (data['clientName'] ?? '')
-                                    .toString()
-                                    .toLowerCase();
-                                final monthNum = data['month'] ?? 1;
-                                final monthStr =
-                                    monthNames[(monthNum - 1).clamp(0, 11)]
-                                        .toLowerCase();
-                                return query.isEmpty ||
-                                    clientName.contains(query) ||
-                                    monthStr.contains(query);
-                              }).toList();
-                              if (docs.isEmpty) {
-                                return const Center(
-                                    child: Text('No receipts found.'));
-                              }
-                              return ListView.separated(
-                                itemCount: docs.length,
-                                separatorBuilder: (_, __) => const Divider(),
-                                itemBuilder: (context, index) {
-                                  final data = docs[index].data()
-                                      as Map<String, dynamic>;
-                                  final clientName =
-                                      data['clientName'] ?? 'N/A';
-                                  final monthNum = data['month'] ?? 1;
-                                  final monthStr =
-                                      monthNames[(monthNum - 1).clamp(0, 11)];
-                                  return ListTile(
-                                    title: Row(
-                                      children: [
-                                        Expanded(child: Text(clientName)),
-                                        Text(monthStr,
-                                            style: const TextStyle(
-                                                color: Colors.blue,
-                                                fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon:
-                                              const Icon(Icons.remove_red_eye),
-                                          tooltip: 'View Details',
-                                          onPressed: () => _showReceiptDetails(
-                                              context, data, docs[index].id),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.share,
-                                              color: Colors.green),
-                                          tooltip: 'Share',
-                                          onPressed: () => _shareReceipt(data),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            },
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by client name or month...',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                ),
+                onChanged: (value) {
+                  searchQuery.value = value.trim().toLowerCase();
+                },
+              ),
+            ),
+            Expanded(
+              child: ValueListenableBuilder<String>(
+                valueListenable: searchQuery,
+                builder: (context, query, _) {
+                  return StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('receipts')
+                        .orderBy('createdAt', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Center(
+                            child: Text('Error loading receipts.'));
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final docs = snapshot.data!.docs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final clientName =
+                            (data['clientName'] ?? '').toString().toLowerCase();
+                        final monthNum = data['month'] ?? 1;
+                        final monthStr = monthNames[(monthNum - 1).clamp(0, 11)]
+                            .toLowerCase();
+                        return query.isEmpty ||
+                            clientName.contains(query) ||
+                            monthStr.contains(query);
+                      }).toList();
+                      if (docs.isEmpty) {
+                        return const Center(child: Text('No receipts found.'));
+                      }
+                      return ListView.separated(
+                        itemCount: docs.length,
+                        separatorBuilder: (_, __) => const Divider(),
+                        itemBuilder: (context, index) {
+                          final data =
+                              docs[index].data() as Map<String, dynamic>;
+                          final clientName = data['clientName'] ?? 'N/A';
+                          final monthNum = data['month'] ?? 1;
+                          final monthStr =
+                              monthNames[(monthNum - 1).clamp(0, 11)];
+                          return ListTile(
+                            title: Row(
+                              children: [
+                                Expanded(child: Text(clientName)),
+                                Text(monthStr,
+                                    style: const TextStyle(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove_red_eye),
+                                  tooltip: 'View Details',
+                                  onPressed: () => _showReceiptDetails(
+                                      context, data, docs[index].id),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.share,
+                                      color: Colors.green),
+                                  tooltip: 'Share',
+                                  onPressed: () => _shareReceipt(data),
+                                ),
+                              ],
+                            ),
                           );
                         },
-                      ),
-                    ),
-                  ],
-                ),
+                      );
+                    },
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -239,29 +218,5 @@ class ReceiptsPage extends StatelessWidget {
     final text =
         'Receipt for ${data['clientName']}\nAmount: ${data['amount']}\n$url';
     Share.share(text);
-  }
-
-  void _deleteReceipt(BuildContext context, String docId) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Receipt'),
-        content: const Text('Are you sure you want to delete this receipt?'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel')),
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete', style: TextStyle(color: Colors.red))),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await FirebaseFirestore.instance
-          .collection('receipts')
-          .doc(docId)
-          .delete();
-    }
   }
 }
