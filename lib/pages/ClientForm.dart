@@ -1,6 +1,7 @@
 import 'package:emet/database_helper.dart';
 import 'package:emet/pages/MyDatabase.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'AppLayout.dart';
 
 class ClientForm extends StatefulWidget {
@@ -13,6 +14,36 @@ class ClientForm extends StatefulWidget {
 }
 
 class _ClientFormState extends State<ClientForm> {
+  Future<void> _pickContact() async {
+    if (!await FlutterContacts.requestPermission()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Contacts permission denied.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    try {
+      final Contact? contact = await FlutterContacts.openExternalPick();
+      if (contact != null) {
+        setState(() {
+          nameController.text = contact.displayName;
+          if (contact.phones.isNotEmpty) {
+            phoneController.text = contact.phones.first.number;
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to pick contact: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -46,9 +77,19 @@ class _ClientFormState extends State<ClientForm> {
                   widget.clientDetails != null
                       ? 'Edit Client'
                       : 'Add New Client',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    onPressed: _pickContact,
+                    icon: const Icon(Icons.person_add,
+                        size: 32, color: Color.fromARGB(255, 0, 103, 181)),
+                    tooltip: 'Pick from Contacts',
+                  ),
+                ),
                 TextFormField(
                   style: const TextStyle(
                       color: Color.fromARGB(255, 0, 103, 181),
@@ -83,7 +124,8 @@ class _ClientFormState extends State<ClientForm> {
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold),
                   controller: apartmentController,
-                  decoration: const InputDecoration(labelText: 'Name of Apartment'),
+                  decoration:
+                      const InputDecoration(labelText: 'Name of Apartment'),
                 ),
                 TextFormField(
                   style: const TextStyle(
@@ -256,8 +298,8 @@ class _ClientFormState extends State<ClientForm> {
           ),
         );
 
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const MyDatabase()));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const MyDatabase()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

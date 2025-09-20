@@ -1,3 +1,4 @@
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'AppLayout.dart';
@@ -12,6 +13,36 @@ class ClientForm extends StatefulWidget {
 }
 
 class _ClientFormState extends State<ClientForm> {
+  Future<void> _pickContact() async {
+    if (!await FlutterContacts.requestPermission()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Contacts permission denied.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    try {
+      final Contact? contact = await FlutterContacts.openExternalPick();
+      if (contact != null) {
+        setState(() {
+          nameController.text = contact.displayName;
+          if (contact.phones.isNotEmpty) {
+            phoneController.text = contact.phones.first.number;
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to pick contact: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -127,8 +158,12 @@ class _ClientFormState extends State<ClientForm> {
             title: const Text('Confirm Delete'),
             content: const Text('Are you sure you want to delete this client?'),
             actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-              TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Delete')),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Delete')),
             ],
           ),
         ) ??
@@ -174,29 +209,48 @@ class _ClientFormState extends State<ClientForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.clientId == null ? 'Add New Client' : 'Edit Client',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        widget.clientId == null
+                            ? 'Add New Client'
+                            : 'Edit Client',
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          onPressed: _pickContact,
+                          icon: const Icon(Icons.person_add,
+                              size: 32,
+                              color: Color.fromARGB(255, 0, 103, 181)),
+                          tooltip: 'Pick from Contacts',
+                        ),
+                      ),
                       TextFormField(
                         controller: nameController,
-                        validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
-                        decoration: const InputDecoration(labelText: "Client's Name"),
+                        validator: (value) =>
+                            value!.isEmpty ? 'Please enter a name' : null,
+                        decoration:
+                            const InputDecoration(labelText: "Client's Name"),
                       ),
                       TextFormField(
                         controller: phoneController,
-                        validator: (value) => value!.isEmpty ? 'Please enter a phone number' : null,
+                        validator: (value) => value!.isEmpty
+                            ? 'Please enter a phone number'
+                            : null,
                         decoration: const InputDecoration(labelText: 'Phone'),
                       ),
                       StreamBuilder<QuerySnapshot>(
                         stream: _propertiesCollection.snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
-                             print("Error fetching properties for dropdown: ${snapshot.error}");
-                             return const Text('Error loading properties');
+                            print(
+                                "Error fetching properties for dropdown: ${snapshot.error}");
+                            return const Text('Error loading properties');
                           }
                           if (!snapshot.hasData) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
                           var properties = snapshot.data!.docs;
                           return DropdownButtonFormField<String>(
@@ -209,20 +263,25 @@ class _ClientFormState extends State<ClientForm> {
                               );
                             }).toList(),
                             onChanged: (value) {
-                              var selectedDoc = properties.firstWhere((doc) => doc.id == value);
+                              var selectedDoc = properties
+                                  .firstWhere((doc) => doc.id == value);
                               setState(() {
                                 _selectedPropertyId = value;
                                 _selectedPropertyName = selectedDoc['name'];
                               });
                             },
-                            validator: (value) => value == null ? 'Please select a property' : null,
-                            decoration: const InputDecoration(labelText: 'Apartment'),
+                            validator: (value) => value == null
+                                ? 'Please select a property'
+                                : null,
+                            decoration:
+                                const InputDecoration(labelText: 'Apartment'),
                           );
                         },
                       ),
                       TextFormField(
                         controller: roomController,
-                        decoration: const InputDecoration(labelText: 'Room number'),
+                        decoration:
+                            const InputDecoration(labelText: 'Room number'),
                       ),
                       const SizedBox(height: 25),
                       Row(
@@ -233,13 +292,15 @@ class _ClientFormState extends State<ClientForm> {
                               onPressed: _deleteClient,
                               icon: const Icon(Icons.delete),
                               label: const Text('Delete'),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red),
                             ),
                           ElevatedButton.icon(
                             onPressed: _saveClient,
                             icon: const Icon(Icons.save),
                             label: const Text('Save Client'),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green),
                           ),
                         ],
                       ),
