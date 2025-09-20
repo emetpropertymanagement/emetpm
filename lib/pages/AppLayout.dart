@@ -6,6 +6,7 @@ import 'package:emet/pages/MyDatabase.dart';
 import 'package:flutter/material.dart';
 
 import 'Receipt.dart';
+import 'ReceiptsPage.dart';
 
 class AppLayout extends StatelessWidget {
   final Widget body;
@@ -73,6 +74,17 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const ClientForm()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.receipt_long),
+            title:
+                const Text('Receipts', style: TextStyle(color: Colors.black)),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ReceiptsPage()));
             },
           ),
           ListTile(
