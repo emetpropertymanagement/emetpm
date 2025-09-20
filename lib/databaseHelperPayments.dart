@@ -1,4 +1,3 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path_provider/path_provider.dart';
@@ -32,7 +31,7 @@ class DatabaseHelperPayments {
 
   Future<String> _getDatabasePath() async {
     final directory = await getApplicationDocumentsDirectory();
-    return join(directory.path, 'exodus.db');
+    return join(directory.path, 'emetdb.db');
   }
 
   Future<void> _createDb(Database db, int version) async {

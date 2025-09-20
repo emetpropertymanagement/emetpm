@@ -1,9 +1,11 @@
-import 'package:exodus_app/database_helper.dart';
-import 'package:exodus_app/pages/AppLayout.dart';
+import 'package:emet/database_helper.dart';
+import 'package:emet/pages/AppLayout.dart';
 import 'package:flutter/material.dart';
 import '../receiptNumberHelper.dart';
 
 class Receipt extends StatefulWidget {
+  const Receipt({super.key});
+
   @override
   _ReceiptState createState() => _ReceiptState();
 }
@@ -11,7 +13,7 @@ class Receipt extends StatefulWidget {
 class _ReceiptState extends State {
   String message = '';
   int currentReceiptNumber = 0;
-  TextEditingController _receiptNumberController = TextEditingController();
+  final TextEditingController _receiptNumberController = TextEditingController();
 
   @override
   void initState() {
@@ -46,32 +48,32 @@ class _ReceiptState extends State {
     return AppLayout(
       body: Center(
         child: Padding(
-          padding: EdgeInsets.all(25.0),
+          padding: const EdgeInsets.all(25.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 'Set Receipt Number',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _receiptNumberController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Enter a Receipt Number',
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   _resetReceiptNumber();
                 },
-                child: Text('Make current number'),
+                child: const Text('Make current number'),
               ),
             ],
           ),
@@ -97,14 +99,14 @@ class _ReceiptState extends State {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Current Receipt Number'),
+          title: const Text('Current Receipt Number'),
           content: Text('Receipt Number: $currentReceiptNumber'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -145,7 +147,7 @@ class _ReceiptState extends State {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );

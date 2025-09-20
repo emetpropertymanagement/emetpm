@@ -1,12 +1,12 @@
-import 'package:exodus_app/database_helper.dart';
-import 'package:exodus_app/pages/MyDatabase.dart';
+import 'package:emet/database_helper.dart';
+import 'package:emet/pages/MyDatabase.dart';
 import 'package:flutter/material.dart';
 import 'AppLayout.dart';
 
 class ClientForm extends StatefulWidget {
   final Map<String, dynamic>? clientDetails;
 
-  const ClientForm({Key? key, this.clientDetails}) : super(key: key);
+  const ClientForm({super.key, this.clientDetails});
 
   @override
   _ClientFormState createState() => _ClientFormState();
@@ -46,11 +46,11 @@ class _ClientFormState extends State<ClientForm> {
                   widget.clientDetails != null
                       ? 'Edit Client'
                       : 'Add New Client',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Color.fromARGB(255, 0, 103, 181),
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold),
@@ -61,10 +61,10 @@ class _ClientFormState extends State<ClientForm> {
                     }
                     return null;
                   },
-                  decoration: InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Name'),
                 ),
                 TextFormField(
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Color.fromARGB(255, 0, 103, 181),
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold),
@@ -75,25 +75,25 @@ class _ClientFormState extends State<ClientForm> {
                     }
                     return null;
                   },
-                  decoration: InputDecoration(labelText: 'Phone'),
+                  decoration: const InputDecoration(labelText: 'Phone'),
                 ),
                 TextFormField(
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Color.fromARGB(255, 0, 103, 181),
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold),
                   controller: apartmentController,
-                  decoration: InputDecoration(labelText: 'Name of Apartment'),
+                  decoration: const InputDecoration(labelText: 'Name of Apartment'),
                 ),
                 TextFormField(
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Color.fromARGB(255, 0, 103, 181),
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold),
                   controller: roomController,
-                  decoration: InputDecoration(labelText: 'Room number'),
+                  decoration: const InputDecoration(labelText: 'Room number'),
                 ),
-                SizedBox(height: 30.0),
+                const SizedBox(height: 30.0),
                 Row(
                   children: [
                     if (widget.clientDetails != null)
@@ -101,8 +101,8 @@ class _ClientFormState extends State<ClientForm> {
                         onPressed: () {
                           _deleteClient(context, widget.clientDetails!['id']);
                         },
-                        icon: Icon(Icons.delete, color: Colors.white),
-                        label: Text(
+                        icon: const Icon(Icons.delete, color: Colors.white),
+                        label: const Text(
                           'Delete',
                           style: TextStyle(
                               color: Color.fromARGB(255, 255, 255, 255),
@@ -115,7 +115,7 @@ class _ClientFormState extends State<ClientForm> {
                           ),
                         ),
                       ),
-                    SizedBox(width: 30),
+                    const SizedBox(width: 30),
                     ElevatedButton.icon(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
@@ -123,7 +123,7 @@ class _ClientFormState extends State<ClientForm> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => MyDatabase()));
+                                  builder: (context) => const MyDatabase()));
                         }
                       },
                       icon: Icon(
@@ -131,7 +131,7 @@ class _ClientFormState extends State<ClientForm> {
                           color: Colors.white),
                       label: Text(
                           widget.clientDetails != null ? 'Update' : 'Add',
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Color.fromARGB(255, 255, 255, 255),
                               fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
@@ -143,29 +143,29 @@ class _ClientFormState extends State<ClientForm> {
                     ),
                   ],
                 ),
-                SizedBox(height: 30.0),
+                const SizedBox(height: 30.0),
                 Row(
                   children: [
                     Container(
-                      color: Color.fromARGB(255, 46, 46, 46),
+                      color: const Color.fromARGB(255, 46, 46, 46),
                       child: TextButton.icon(
                           onPressed: () {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => MyDatabase()));
+                                    builder: (context) => const MyDatabase()));
                           },
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.arrow_back,
                             color: Color.fromARGB(255, 255, 255, 255),
                           ),
-                          label: Text(
+                          label: const Text(
                             "Back",
                             style: TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255)),
                           )),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 50.0,
                     ),
                   ],
@@ -198,7 +198,7 @@ class _ClientFormState extends State<ClientForm> {
 
     if (clientId != -1) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
             'Client updated successfully!',
             style: TextStyle(color: Colors.black, fontSize: 14.0),
@@ -210,7 +210,7 @@ class _ClientFormState extends State<ClientForm> {
       _resetForm();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Failed to add/update client. Please try again.',
               style: TextStyle(color: Colors.black, fontSize: 14.0)),
           backgroundColor: Color.fromARGB(255, 255, 161, 161),
@@ -225,20 +225,20 @@ class _ClientFormState extends State<ClientForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Delete'),
-          content: Text('Are you sure you want to delete this client?'),
+          title: const Text('Confirm Delete'),
+          content: const Text('Are you sure you want to delete this client?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false); // User canceled
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(true); // User confirmed
               },
-              child: Text('Delete'),
+              child: const Text('Delete'),
             ),
           ],
         );
@@ -251,16 +251,16 @@ class _ClientFormState extends State<ClientForm> {
 
       if (rowsDeleted > 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Client deleted successfully!'),
           ),
         );
 
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => MyDatabase()));
+            context, MaterialPageRoute(builder: (context) => const MyDatabase()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Failed to delete client. Please try again.'),
           ),
         );

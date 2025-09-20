@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 class FirebaseFileUpload {
@@ -29,7 +28,7 @@ class FirebaseFileUpload {
 
       // Show success message or handle next steps
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('File uploaded successfully.'),
           backgroundColor: Colors.green,
         ),

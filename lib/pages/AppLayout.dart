@@ -1,120 +1,123 @@
-import 'package:exodus_app/pages/Analytics.dart';
-import 'package:exodus_app/pages/ClientForm.dart';
-import 'package:exodus_app/pages/NewClientForm.dart';
-import 'package:exodus_app/pages/PaymentForm.dart';
-import 'package:exodus_app/pages/Dashboard.dart';
-import 'package:exodus_app/pages/home.dart';
-import 'package:exodus_app/pages/MyDatabase.dart';
+import 'package:emet/pages/Analytics.dart';
+import 'package:emet/pages/NewClientForm.dart';
+import 'package:emet/pages/Properties.dart';
+import 'package:emet/pages/home.dart';
+import 'package:emet/pages/MyDatabase.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'Receipt.dart';
 
 class AppLayout extends StatelessWidget {
   final Widget body;
+  final Widget? floatingActionButton;
 
-  AppLayout({required this.body});
+  const AppLayout({super.key, required this.body, this.floatingActionButton});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Exodus LLC',
+        title: const Text(
+          'EMET Property Management',
           style: TextStyle(
-            color: const Color.fromARGB(255, 255, 255, 255),
-            fontSize: 24,
+            color: Color.fromARGB(255, 255, 255, 255),
+            fontSize: 18,
           ),
         ),
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white, // Change the color of the menu icon here
         ),
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Home()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const Home()));
             },
-            icon: Icon(Icons.logout),
-            color: Color.fromARGB(255, 255, 255, 255),
+            icon: const Icon(Icons.logout),
+            color: const Color.fromARGB(255, 255, 255, 255),
           ),
         ],
-        backgroundColor: Color.fromARGB(255, 29, 29, 1),
+        backgroundColor: const Color.fromARGB(255, 29, 29, 1),
         elevation: 20,
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: body,
+      floatingActionButton: floatingActionButton,
     );
   }
 }
 
 class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
+          const DrawerHeader(
               decoration: BoxDecoration(
-                color: Color.fromARGB(255, 0, 94, 148),
+                color: Color.fromARGB(255, 6, 130, 31),
               ),
               child: Column(children: <Widget>[
                 Image(
                   image: AssetImage("assets/bigezow.png"),
-                  width: 150,
+                  width: 100,
                 ),
               ])),
           ListTile(
-            leading: Icon(Icons.person_add_alt),
-            title: Text('New Contact', style: TextStyle(color: Colors.black)),
+            leading: const Icon(Icons.person_add_alt),
+            title: const Text('New Contact',
+                style: TextStyle(color: Colors.black)),
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => NewClientForm()));
+                  MaterialPageRoute(builder: (context) => const ClientForm()));
             },
           ),
           ListTile(
-            leading: Icon(Icons.print),
-            title: Text('Database', style: TextStyle(color: Colors.black)),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => MyDatabase()));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.trending_up),
-            title: Text('Analytics', style: TextStyle(color: Colors.black)),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Analytics()));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.receipt),
+            leading: const Icon(Icons.print),
             title:
-                Text('Receipt Number', style: TextStyle(color: Colors.black)),
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Receipt()));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home', style: TextStyle(color: Colors.black)),
+                const Text('Database', style: TextStyle(color: Colors.black)),
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Dashboard()));
+                  MaterialPageRoute(builder: (context) => const MyDatabase()));
             },
           ),
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout', style: TextStyle(color: Colors.black)),
+            leading: const Icon(Icons.trending_up),
+            title:
+                const Text('Analytics', style: TextStyle(color: Colors.black)),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const Analytics()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.receipt),
+            title: const Text('Receipt Number',
+                style: TextStyle(color: Colors.black)),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const Receipt()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title:
+                const Text('Properties', style: TextStyle(color: Colors.black)),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const Properties()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout', style: TextStyle(color: Colors.black)),
             onTap: () {
               // Handle Logout click
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Home()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const Home()));
             },
           ),
         ],

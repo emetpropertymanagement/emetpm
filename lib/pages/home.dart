@@ -1,135 +1,153 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 import 'Dashboard.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
   String errorMessage = "";
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: ListView(
-      children: [
-        Container(
-          margin: EdgeInsets.all(5),
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.only(
-                      left: 20.0, top: 20.0, right: 20.0, bottom: 20.0),
-                  child: SizedBox(
-                    width: 100,
-                    child: Image.asset('assets/bigezo.png'),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(
-                      left: 20.0, top: 20.0, right: 20.0, bottom: 10.0),
-                  child: Text(
-                    "NAKITTO SARAH APARTMENTS",
+      body: ListView(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(5),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 60),
+                  const Text(
+                    "EMET PROPERTY MANAGEMENT",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(197, 11, 90, 174)),
+                        color: Color.fromARGB(255, 0, 148, 5)),
                   ),
-                ),
-                Container(
-                  margin:
-                      EdgeInsets.only(left: 20, top: 0, right: 20, bottom: 0.0),
-                  child: TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    style: TextStyle(fontSize: 25),
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 10.0,
-                  width: 200.0,
-                ),
-                if (errorMessage.isNotEmpty)
-                  Text(
-                    errorMessage,
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 16,
-                    ),
-                  ),
-                SizedBox(height: 10.0),
-                Container(
-                  margin: EdgeInsets.only(left: 0, top: 0, right: 0),
-                  padding: EdgeInsets.all(5),
-                  child: SizedBox(
-                    width: 500.0,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                          Color.fromARGB(198, 4, 90, 171),
-                        ),
-                        elevation: MaterialStateProperty.all<double>(3),
-                        padding: MaterialStateProperty.all(EdgeInsets.all(10)),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(0.0),
+                  const SizedBox(height: 40),
+                  isLoading
+                      ? const CircularProgressIndicator()
+                      : SizedBox(
+                          width: 250,
+                          child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all<Color>(
+                                Color.fromARGB(255, 0, 148, 5),
+                              ),
+                              elevation: WidgetStateProperty.all<double>(3),
+                              padding: WidgetStateProperty.all(
+                                  const EdgeInsets.symmetric(vertical: 16)),
+                              shape: WidgetStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                            ),
+                            onPressed: signInWithGoogle,
+                            child: const Text(
+                              'Login with Google',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      onPressed: () {
-                        printCredentials(context);
-                      },
+                  if (errorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
                       child: Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                        errorMessage,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        Container(
-            margin: EdgeInsets.only(
-                left: 20.0, top: 20.0, right: 20.0, bottom: 10.0),
-            child: Center(
-                child: Text(
-              "Developed by Alfred +256773913902",
-              style: TextStyle(color: Color.fromARGB(95, 27, 27, 27)),
-            ))),
-      ],
-    ));
+          Container(
+              margin: const EdgeInsets.only(
+                  left: 20.0, top: 20.0, right: 20.0, bottom: 10.0),
+              child: const Center(
+                  child: Text(
+                "Developed by Alfred +256773913902",
+                style: TextStyle(color: Color.fromARGB(95, 27, 27, 27)),
+              ))),
+        ],
+      ),
+    );
   }
 
-  void printCredentials(BuildContext context) {
-    if (passwordController.text == "Nakitto") {
-      // Navigate to Dashboard if credentials are correct
-      passwordController.clear();
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Dashboard()),
+  Future<void> signInWithGoogle() async {
+    print('[Login] Google sign-in started');
+    setState(() {
+      isLoading = true;
+      errorMessage = "";
+    });
+    try {
+      await GoogleSignInPlatform.instance.init(const InitParameters());
+      final AuthenticationResults? result = await GoogleSignInPlatform.instance
+          .attemptLightweightAuthentication(
+              const AttemptLightweightAuthenticationParameters());
+      final GoogleSignInUserData? user = result?.user;
+      print('[Login] Google user: ' + (user?.email ?? 'null'));
+      if (user == null) {
+        print('[Login] Sign in aborted by user');
+        setState(() {
+          isLoading = false;
+          errorMessage = "Sign in aborted";
+        });
+        return;
+      }
+      // Get tokens for Firebase Auth
+      final ClientAuthorizationTokenData? tokens = await GoogleSignInPlatform
+          .instance
+          .clientAuthorizationTokensForScopes(
+        ClientAuthorizationTokensForScopesParameters(
+          request: AuthorizationRequestDetails(
+            scopes: const <String>["email"],
+            userId: user.id,
+            email: user.email,
+            promptIfUnauthorized: false,
+          ),
+        ),
       );
-    } else {
-      // Handle incorrect credentials
+      if (tokens == null || tokens.accessToken == null) {
+        throw Exception('Google sign-in failed: Missing accessToken');
+      }
+      final credential =
+          GoogleAuthProvider.credential(accessToken: tokens.accessToken);
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      print('[Login] Firebase user: ' + (userCredential.user?.email ?? 'null'));
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Dashboard()),
+      );
+    } catch (e) {
+      print('[Login] Google sign-in failed: $e');
       setState(() {
-        errorMessage = "Invalid password";
+        errorMessage = "Google sign-in failed: $e";
       });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+      print('[Login] Google sign-in finished');
     }
   }
 }

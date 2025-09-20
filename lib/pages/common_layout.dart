@@ -3,33 +3,33 @@ import 'package:flutter/material.dart';
 class CommonLayout extends StatelessWidget {
   final Widget body;
 
-  CommonLayout({required this.body});
+  const CommonLayout({super.key, required this.body});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('NAKITTO SARAH APARTMENTS',
+        title: const Text('NAKITTO SARAH APARTMENTS',
             style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),
-        backgroundColor: Color.fromARGB(255, 32, 32, 32),
+        backgroundColor: const Color.fromARGB(255, 32, 32, 32),
       ),
       body: Expanded(child: body),
       drawer: Drawer(
         elevation: 20.0,
         child: Container(
-            color: Color.fromARGB(255, 56, 118, 19),
+            color: const Color.fromARGB(255, 56, 118, 19),
             child: Column(
               children: <Widget>[
                 Container(
                   child: UserAccountsDrawerHeader(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Color.fromARGB(255, 50, 50, 50),
                     ),
-                    accountName: Text(
+                    accountName: const Text(
                       "EXODUS LLC",
                       style: TextStyle(color: Colors.amber),
                     ),
-                    accountEmail: Text("timexodusapts@gmail.com"),
+                    accountEmail: const Text("timexodusapts@gmail.com"),
                     currentAccountPicture: CircleAvatar(
                       backgroundColor: Colors.white,
                       child: ClipOval(
@@ -39,55 +39,55 @@ class CommonLayout extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                    title: new Text("Inbox",
+                    title: const Text("Inbox",
                         style: TextStyle(color: Colors.white)),
                     leading: Container(
-                      child: Icon(
+                      child: const Icon(
                         Icons.mail,
                         color: Colors.white,
                       ),
                     )),
-                Divider(
+                const Divider(
                   height: 0.1,
                 ),
                 ListTile(
-                    title: new Text("Primary",
+                    title: const Text("Primary",
                         style: TextStyle(color: Colors.white)),
                     leading: Container(
-                      child: Icon(
+                      child: const Icon(
                         Icons.inbox,
                         color: Colors.white,
                       ),
                     )),
                 ListTile(
-                    title: new Text("Social",
+                    title: const Text("Social",
                         style: TextStyle(color: Colors.white)),
                     leading: Container(
-                      child: Icon(
+                      child: const Icon(
                         Icons.people,
                         color: Colors.white,
                       ),
                     )),
                 ListTile(
-                  title: new Text("Promotions",
+                  title: const Text("Promotions",
                       style: TextStyle(color: Colors.white)),
                   leading: Container(
-                    child: Icon(
+                    child: const Icon(
                       Icons.local_offer,
                       color: Colors.white,
                     ),
                   ),
                 ),
                 ListTile(
-                    title: new Text(
+                    title: const Text(
                       "Created By Alfred",
                       style: TextStyle(
                         color: Colors.white,
                       ),
                     ),
                     leading: Container(
-                        margin: EdgeInsets.only(top: 20),
-                        child: Icon(
+                        margin: const EdgeInsets.only(top: 20),
+                        child: const Icon(
                           Icons.copyright,
                           color: Colors.white,
                         ))),

@@ -1,8 +1,10 @@
-import 'package:exodus_app/pages/AppLayout.dart';
+import 'package:emet/pages/AppLayout.dart';
 import 'package:flutter/material.dart';
-import 'package:exodus_app/database_helper.dart';
+import 'package:emet/database_helper.dart';
 
 class Analytics extends StatefulWidget {
+  const Analytics({super.key});
+
   @override
   _AnalyticsState createState() => _AnalyticsState();
 }
@@ -29,12 +31,12 @@ class _AnalyticsState extends State<Analytics> {
     return AppLayout(
         body: Center(
       child: Padding(
-        padding: EdgeInsets.all(25.0),
+        padding: const EdgeInsets.all(25.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(20.0),
+            const Padding(
+              padding: EdgeInsets.all(20.0),
               child: Row(
                 children: [
                   Icon(Icons.analytics),
@@ -49,8 +51,8 @@ class _AnalyticsState extends State<Analytics> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
               child: Text(
                 'Total Clients:',
                 style: TextStyle(
@@ -64,7 +66,7 @@ class _AnalyticsState extends State<Analytics> {
               padding: const EdgeInsets.all(20.0),
               child: Text(
                 totalClients.toString(),
-                style: TextStyle(
+                style: const TextStyle(
                   backgroundColor: Color.fromARGB(255, 255, 241, 148),
                   fontSize: 100,
                   fontWeight: FontWeight.bold,

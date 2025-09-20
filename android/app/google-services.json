@@ -1,26 +1,51 @@
 {
   "project_info": {
-    "project_number": "665858336141",
-    "project_id": "exodusllcapp",
-    "storage_bucket": "exodusllcapp.appspot.com"
+    "project_number": "605400824395",
+    "project_id": "emetapp",
+    "storage_bucket": "emetapp.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:665858336141:android:b4a0b8a83717e234cb89c4",
+        "mobilesdk_app_id": "1:605400824395:android:a6778f5da7735680cc2bce",
         "android_client_info": {
-          "package_name": "com.example.exodus_app"
+          "package_name": "com.example.emet"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "605400824395-q8i5n4bt6bau2251pi0hijaru4jr9iu1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.emet",
+            "certificate_hash": "409547ec893020e1dcb659a13bdf3b23e23f34e0"
+          }
+        },
+        {
+          "client_id": "605400824395-su501m0501makd7j3pafp18kji45pch8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAZmODUfPmh8HOv-fJ9JJRjqMhd3PD8U4A"
+          "current_key": "AIzaSyDIyD3BOGMLnOnhoTiWNb8eYDt0-aT34bQ"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "605400824395-icautk76buu8sa19a1a05cvhi7tqidqq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "605400824395-qogl5q58vcpbd8cevtqgjq7cuq13har9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.emet"
+              }
+            }
+          ]
         }
       }
     }
