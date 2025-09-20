@@ -164,7 +164,22 @@ class _PaymentFormState extends State<PaymentForm> {
               .replaceAll('/', '_');
       final int year = DateTime.now().year;
       final int month = DateTime.now().month;
-      final String filePath = '$apartment/$year/$month/$fileName';
+      const List<String> monthNames = [
+        'january',
+        'february',
+        'march',
+        'april',
+        'may',
+        'june',
+        'july',
+        'august',
+        'september',
+        'october',
+        'november',
+        'december'
+      ];
+      final String monthName = monthNames[month - 1];
+      final String filePath = '$apartment/$year/$monthName/$fileName';
       final ref = FirebaseStorage.instance.ref().child(filePath);
       final uploadTask = ref.putFile(file);
 
