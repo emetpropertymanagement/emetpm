@@ -12,6 +12,8 @@ class MyDatabase extends StatefulWidget {
 }
 
 class _DatabaseState extends State<MyDatabase> {
+  TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
   final CollectionReference _clientsCollection =
       FirebaseFirestore.instance.collection('clients');
 
@@ -39,21 +41,46 @@ class _DatabaseState extends State<MyDatabase> {
                 ],
               ),
             ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by name or phone...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.trim().toLowerCase();
+                  });
+                },
+              ),
+            ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream:
-                    _clientsCollection.orderBy('name').snapshots(),
+                stream: _clientsCollection.orderBy('name').snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return const Center(
-                        child: Text('Something went wrong.'));
+                    return const Center(child: Text('Something went wrong.'));
                   }
-
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-
-                  if (snapshot.data!.docs.isEmpty) {
+                  final docs = snapshot.data!.docs.where((doc) {
+                    final data = doc.data()! as Map<String, dynamic>;
+                    final name = (data['name'] ?? '').toString().toLowerCase();
+                    final phone =
+                        (data['phone'] ?? '').toString().toLowerCase();
+                    return _searchQuery.isEmpty ||
+                        name.contains(_searchQuery) ||
+                        phone.contains(_searchQuery);
+                  }).toList();
+                  if (docs.isEmpty) {
                     return const Center(
                       child: Text(
                         'No clients found. Add one!',
@@ -61,15 +88,14 @@ class _DatabaseState extends State<MyDatabase> {
                       ),
                     );
                   }
-
                   return ListView.builder(
-                    itemCount: snapshot.data!.docs.length,
+                    itemCount: docs.length,
                     itemBuilder: (context, index) {
-                      DocumentSnapshot doc = snapshot.data!.docs[index];
+                      DocumentSnapshot doc = docs[index];
                       Map<String, dynamic> clientData =
                           doc.data()! as Map<String, dynamic>;
-
-                      return _buildClientListItem(doc.id, clientData, index + 1);
+                      return _buildClientListItem(
+                          doc.id, clientData, index + 1);
                     },
                   );
                 },
@@ -83,7 +109,8 @@ class _DatabaseState extends State<MyDatabase> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const ClientForm(), // Navigate to the new form to add
+              builder: (context) =>
+                  const ClientForm(), // Navigate to the new form to add
             ),
           );
         },
@@ -129,7 +156,8 @@ class _DatabaseState extends State<MyDatabase> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ClientForm(clientId: docId), // Pass docId to edit
+                      builder: (context) =>
+                          ClientForm(clientId: docId), // Pass docId to edit
                     ),
                   );
                 },
