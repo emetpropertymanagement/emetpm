@@ -34,6 +34,13 @@ class _HomeState extends State<Home> {
                         color: Color.fromARGB(255, 0, 148, 5)),
                   ),
                   const SizedBox(height: 40),
+                  // Logo above the login button
+                  Image.asset(
+                    'assets/bigezo.png',
+                    width: 120,
+                    height: 120,
+                  ),
+                  const SizedBox(height: 30),
                   isLoading
                       ? const CircularProgressIndicator()
                       : SizedBox(

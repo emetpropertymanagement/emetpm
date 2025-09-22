@@ -1,7 +1,6 @@
-import 'package:emet/database_helper.dart';
 import 'package:emet/pages/AppLayout.dart';
 import 'package:flutter/material.dart';
-import '../receiptNumberHelper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Receipt extends StatefulWidget {
   const Receipt({super.key});
@@ -10,126 +9,52 @@ class Receipt extends StatefulWidget {
   _ReceiptState createState() => _ReceiptState();
 }
 
-class _ReceiptState extends State {
-  String message = '';
+class _ReceiptState extends State<Receipt> {
   int currentReceiptNumber = 0;
-  final TextEditingController _receiptNumberController = TextEditingController();
+  final TextEditingController _receiptNumberController =
+      TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _initializeDatabase();
-  }
-
-  Future<void> _initializeDatabase() async {
-    try {
-      bool tableCreated = await createReceiptNumberTable();
-      if (!tableCreated) {
-        _showDialog('---', 'Table already exists');
-        return;
-      }
-      _showDialog('Success', 'Table created successfully');
-      await _loadCurrentReceiptNumber();
-    } catch (e) {
-      _showDialog('Error', 'Failed to initialize database: $e');
-    }
+    _loadCurrentReceiptNumber();
   }
 
   Future<void> _loadCurrentReceiptNumber() async {
-    int receiptNumber = await ReceiptNumberHelper.instance.getReceiptNumber();
-    setState(() {
-      currentReceiptNumber = receiptNumber;
-      _receiptNumberController.text = currentReceiptNumber.toString();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppLayout(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text(
-                'Set Receipt Number',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _receiptNumberController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Enter a Receipt Number',
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _resetReceiptNumber();
-                },
-                child: const Text('Make current number'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<bool> createReceiptNumberTable() async {
     try {
-      final db = await DatabaseHelper.instance.database;
-      await DatabaseHelper.instance
-          .createDbReceipt(); // Call the method from DatabaseHelper with the database instance
-      return true;
+      final doc = await FirebaseFirestore.instance
+          .collection('settings')
+          .doc('receipt_number')
+          .get();
+      int receiptNumber = 1;
+      if (doc.exists &&
+          doc.data() != null &&
+          doc.data()!.containsKey('current')) {
+        receiptNumber = doc.data()!['current'] as int;
+      } else if (doc.exists &&
+          doc.data() != null &&
+          doc.data()!.containsKey('start')) {
+        receiptNumber = doc.data()!['start'] as int;
+      }
+      setState(() {
+        currentReceiptNumber = receiptNumber;
+        _receiptNumberController.text = currentReceiptNumber.toString();
+      });
     } catch (e) {
-      print('Error creating table: $e');
-      return false;
+      _showDialog('Error', 'Failed to load receipt number: $e');
     }
   }
 
-  void _showCurrentReceiptNumber() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Current Receipt Number'),
-          content: Text('Receipt Number: $currentReceiptNumber'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showAllTables() async {
-    try {
-      List<String> tables = await ReceiptNumberHelper.instance.getAllTables();
-      _showDialog('All Tables', 'Tables: ${tables.join(", ")}');
-    } catch (e) {
-      _showDialog('Error', 'Failed to retrieve tables: $e');
-    }
-  }
-
-  void _resetReceiptNumber() async {
+  Future<void> _resetReceiptNumber() async {
     try {
       int newReceiptNumber = int.parse(_receiptNumberController.text);
-      await ReceiptNumberHelper.instance.resetReceiptNumber(newReceiptNumber);
+      await FirebaseFirestore.instance
+          .collection('settings')
+          .doc('receipt_number')
+          .set({'current': newReceiptNumber}, SetOptions(merge: true));
       await _loadCurrentReceiptNumber();
-      _showDialog('Receipt Number Updated',
-          'New Receipt Number: $currentReceiptNumber');
+      _showDialog(
+          'Receipt Number Updated', 'New Receipt Number: $newReceiptNumber');
     } catch (e) {
       _showDialog('Error', 'Failed to update receipt number: $e');
     }
@@ -152,6 +77,57 @@ class _ReceiptState extends State {
           ],
         );
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppLayout(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(25.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Current Receipt Number: $currentReceiptNumber',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Set Receipt Number',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _receiptNumberController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Enter a Receipt Number',
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _resetReceiptNumber();
+                },
+                child: const Text('Make current number'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

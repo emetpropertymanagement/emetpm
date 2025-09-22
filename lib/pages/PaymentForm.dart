@@ -19,6 +19,7 @@ class PaymentForm extends StatefulWidget {
 }
 
 class _PaymentFormState extends State<PaymentForm> {
+  int? _receiptNumber;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController amountController = TextEditingController();
   final TextEditingController amountInWordsController = TextEditingController();
@@ -127,12 +128,18 @@ class _PaymentFormState extends State<PaymentForm> {
     });
 
     try {
-      final pdfFile = await _createReceipt();
+      // Get and increment receipt number from Firestore
+      int receiptNumber = await _getAndIncrementReceiptNumber();
+      setState(() {
+        _receiptNumber = receiptNumber;
+      });
+
+      final pdfFile = await _createReceipt(receiptNumber);
       if (pdfFile == null) throw Exception("Failed to create PDF.");
 
       final String downloadUrl = await _uploadPdf(pdfFile);
 
-      await _saveReceiptToFirestore(downloadUrl);
+      await _saveReceiptToFirestore(downloadUrl, receiptNumber);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -205,7 +212,7 @@ class _PaymentFormState extends State<PaymentForm> {
     }
   }
 
-  Future<void> _saveReceiptToFirestore(String pdfUrl) async {
+  Future<void> _saveReceiptToFirestore(String pdfUrl, int receiptNumber) async {
     try {
       await FirebaseFirestore.instance.collection('receipts').add({
         'clientId': widget.clientDetails['id'],
@@ -221,6 +228,7 @@ class _PaymentFormState extends State<PaymentForm> {
         'createdAt': Timestamp.now(),
         'month': DateTime.now().month,
         'year': DateTime.now().year,
+        'receiptNumber': receiptNumber,
       });
     } catch (e) {
       print("Error saving receipt to Firestore: $e");
@@ -228,7 +236,7 @@ class _PaymentFormState extends State<PaymentForm> {
     }
   }
 
-  Future<File?> _createReceipt() async {
+  Future<File?> _createReceipt(int receiptNumber) async {
     try {
       final PdfDocument document = PdfDocument();
       final PdfPage page = document.pages.add();
@@ -242,10 +250,52 @@ class _PaymentFormState extends State<PaymentForm> {
           Rect.fromLTWH(
               0, 0, page.getClientSize().width, page.getClientSize().height));
 
-      // Add 250px top gap
-      double tableTop = 200;
+      // Add 250px top gap, plus extra 20px below receipt number
+      double tableTop = 250 + 20;
 
-      // Prepare table data (no header row)
+      // Draw date at top left and receipt number at top right, both on same line
+      String receiptDate = "${DateTime.now().toLocal()}".split(' ')[0];
+      double headerTop = tableTop - 40;
+      // Date top left
+      page.graphics.drawString(
+        'Date: $receiptDate',
+        PdfStandardFont(PdfFontFamily.helvetica, 13),
+        brush: PdfSolidBrush(PdfColor(128, 128, 128)),
+        bounds: Rect.fromLTWH(40, headerTop, 200, 20),
+        format: PdfStringFormat(
+          alignment: PdfTextAlignment.left,
+          lineAlignment: PdfVerticalAlignment.top,
+        ),
+      );
+      // 'Receipt number' and actual number on same row, right-aligned
+      String receiptLabel = 'Receipt number: ';
+      String receiptNumStr = receiptNumber.toString().padLeft(6, '0');
+      // Draw label
+      page.graphics.drawString(
+        receiptLabel,
+        PdfStandardFont(PdfFontFamily.helvetica, 12),
+        brush: PdfSolidBrush(PdfColor(128, 128, 128)),
+        bounds:
+            Rect.fromLTWH(page.getClientSize().width - 300, headerTop, 120, 20),
+        format: PdfStringFormat(
+          alignment: PdfTextAlignment.right,
+          lineAlignment: PdfVerticalAlignment.top,
+        ),
+      );
+      // Draw number right next to label, bold and red
+      page.graphics.drawString(
+        receiptNumStr,
+        PdfStandardFont(PdfFontFamily.helvetica, 20, style: PdfFontStyle.bold),
+        brush: PdfSolidBrush(PdfColor(220, 0, 0)),
+        bounds: Rect.fromLTWH(
+            page.getClientSize().width - 180, headerTop - 2, 160, 30),
+        format: PdfStringFormat(
+          alignment: PdfTextAlignment.left,
+          lineAlignment: PdfVerticalAlignment.top,
+        ),
+      );
+
+      // Prepare table data (no header row, no date)
       final List<List<String>> tableData = [
         ['Client', widget.clientDetails['name'] ?? ''],
         ['Property', widget.clientDetails['propertyName'] ?? ''],
@@ -254,7 +304,6 @@ class _PaymentFormState extends State<PaymentForm> {
         ['Month', reasonController.text],
         ['Balance', 'UGX ${_formatMoney(balanceController.text)}'],
         ['Next Payment', nextDateController.text],
-        ['Date', "${DateTime.now().toLocal()}".split(' ')[0]],
       ];
 
       // Create PdfGrid (no header)
@@ -301,6 +350,28 @@ class _PaymentFormState extends State<PaymentForm> {
       print("Error creating PDF: $e");
       return null;
     }
+  }
+
+  // Get and increment receipt number from Firestore
+  Future<int> _getAndIncrementReceiptNumber() async {
+    final settingsDoc =
+        FirebaseFirestore.instance.collection('settings').doc('receipt_number');
+    return await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(settingsDoc);
+      int currentNumber = 1;
+      if (snapshot.exists &&
+          snapshot.data() != null &&
+          snapshot.data()!.containsKey('current')) {
+        currentNumber = snapshot.data()!['current'] as int;
+      } else if (snapshot.exists &&
+          snapshot.data() != null &&
+          snapshot.data()!.containsKey('start')) {
+        currentNumber = snapshot.data()!['start'] as int;
+      }
+      transaction.set(
+          settingsDoc, {'current': currentNumber + 1}, SetOptions(merge: true));
+      return currentNumber;
+    });
   }
 
   String _formatMoney(String value) {
