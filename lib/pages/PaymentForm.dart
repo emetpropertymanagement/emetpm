@@ -251,7 +251,7 @@ class _PaymentFormState extends State<PaymentForm> {
         ['Property', widget.clientDetails['propertyName'] ?? ''],
         ['Amount', 'UGX ${_formatMoney(amountController.text)}'],
         ['In Words', amountInWordsController.text],
-        ['For', reasonController.text],
+        ['Month', reasonController.text],
         ['Balance', 'UGX ${_formatMoney(balanceController.text)}'],
         ['Next Payment', nextDateController.text],
         ['Date', "${DateTime.now().toLocal()}".split(' ')[0]],
