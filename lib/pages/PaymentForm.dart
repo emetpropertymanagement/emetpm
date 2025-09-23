@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'ReceiptsPage.dart';
+import 'SendSms.dart';
 
 class PaymentForm extends StatefulWidget {
   final Map<String, dynamic> clientDetails;
@@ -19,6 +20,7 @@ class PaymentForm extends StatefulWidget {
 }
 
 class _PaymentFormState extends State<PaymentForm> {
+  final SendSMS smsSender = SendSMS();
   int? _receiptNumber;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController amountController = TextEditingController();
@@ -140,6 +142,31 @@ class _PaymentFormState extends State<PaymentForm> {
       final String downloadUrl = await _uploadPdf(pdfFile);
 
       await _saveReceiptToFirestore(downloadUrl, receiptNumber);
+
+      // --- SMS Section ---
+      String name = widget.clientDetails['name'] ?? '';
+      String phoneRaw = widget.clientDetails['phone']?.toString() ?? '';
+      String balance = balanceController.text;
+      String nextDate = nextDateController.text;
+
+      // Format phone number to 256XXXXXXXXX
+      String phone = phoneRaw.replaceAll(RegExp(r'[^0-9]'), '');
+      if (phone.startsWith('0')) {
+        phone = '256' + phone.substring(1);
+      } else if (phone.length == 9) {
+        phone = '256' + phone;
+      } else if (phone.length == 10 && phone.startsWith('256')) {
+        // already correct
+      } else if (phone.length == 12 && phone.startsWith('256')) {
+        // already correct
+      } else {
+        phone = '256773913902'; // fallback
+      }
+
+      String message =
+          'Dear $name, thanks for your rent payment! Balance: UGX $balance. Next payment due $nextDate. We appreciate you. – Emet Property Management.';
+      await smsSender.sendSms(message, phone);
+      // --- End SMS Section ---
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
